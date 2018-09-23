@@ -1,6 +1,7 @@
 #!/bin/dash
 linebuffer_hack="stdbuf -o0"
 default_transformer="$(command -v cat)"
+debug=1
 
 [ "$(id -u)"x = "0"x ] && {
 	echo Running as root is dangerous, and therefore disabled in script $(readlink -f $0) >&2;
@@ -35,7 +36,8 @@ test -x "$(command -v $transformer)" || {
 };
 
 subscriber() {
-  echo "$1" | $linebuffer_hack $transformer &
+  test -z "$debug" || { [ "$debug" -eq 1 ] && echo DEBUG: Subscribe received message \"$1\". Passing to \"$transformer\" >&2 ;};
+  echo -n "$1" | $linebuffer_hack $transformer &
 }
 
-tail -n 0 -f "$topic" 2>/dev/null | while read line; do subscriber "$line"; done
+tail -n 0 -F "$topic" 2>/dev/null | while read -r in; do subscriber "$in"; done

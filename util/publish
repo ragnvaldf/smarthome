@@ -1,6 +1,7 @@
 #!/bin/dash
 linebuffer_hack="stdbuf -o0"
 default_transformer="$(command -v cat)"
+debug=1
 
 [ "$(id -u)"x = "0"x ] && {
 	echo Running as root is dangerous, and therefore disabled in script $(readlink -f $0) >&2;
@@ -35,6 +36,7 @@ test -x "$(command -v $transformer)" || {
 };
 
 publisher() {
+  test -z "$debug" || { [ "$debug" -eq 1 ] && echo DEBUG: Publish \"$1\" using \"$transformer\" to \"$topic\" >&2 ;};
   echo "$1" | $linebuffer_hack $transformer > "$topic"
 }
 
